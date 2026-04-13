@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "login.html";
+      }
+    </script>
+    <link rel="stylesheet" href="style.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="pdf-export.js"></script>
+    <link rel="icon" type="image/png" href="logo.png">
+    <title>Perhitungan Fumigasi, Spraying dan Fogging</title>
+</head>
+<body>
+    <div class="page-wrapper">
+<button onclick="logout()">Logout</button>
+        <header>
+            <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:8px;">
+                <img src="logo.png" alt="Logo" style="width:90px; height:auto; margin:0;">
+                <div style="width:1px; height:40px; background:#e2e8f0;"></div>
+                <img src="jastasma.png" alt="Logo Jastasma" style="width:90px; height:auto; margin:0;">
+            </div>
+            <h1>Kalkulator Fumigasi, Spraying dan Fogging</h1>
+            <p class="subtitle">Pilih jenis perhitungan yang diinginkan</p>
+        </header>
+
+        <main>
+
+            <div class="tab-group">
+                <button class="tab active" onclick="switchTab('fumigasi')">Fumigasi</button>
+                <button class="tab" onclick="switchTab('fumigasi-sf')">Fumigasi SF</button>
+                <button class="tab" onclick="switchTab('spraying')">Spraying</button>
+                <button class="tab" onclick="switchTab('fogging')">Fogging</button>
+            </div>
+
+            <!-- ======================== -->
+            <!--     FUMIGASI SECTION     -->
+            <!-- ======================== -->
+            <div id="tab-fumigasi" style="display:block;">
+
+                <div id="f-sungkup-list">
+                    <section class="card" data-sungkup="1">
+                        <div class="card-label">
+                            <span>Sungkup 1</span>
+                        </div>
+
+                        <div class="form-grid" style="margin-bottom:14px;">
+                            <div class="field">
+                                <label>Jenis Komoditi</label>
+                                <select class="f-commodity" onchange="onKomoditasChangeSungkup(this)">
+                                    <option value="beras">Beras</option>
+                                    <option value="gabah">Gabah</option>
+                                    <option value="jagung">Jagung</option>
+                                    <option value="kedelai">Kedelai</option>
+                                    <option value="custom">Lainnya (manual)</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Kode Sungkup</label>
+                                <input type="text" class="f-kode-sungkup" placeholder="Contoh: S-01">
+                            </div>
+                        </div>
+
+                        <div class="form-grid" style="margin-bottom:14px;">
+                            <div class="field">
+                                <label>Mode Input Kuantum</label>
+                                <div style="display:flex; gap:0; margin-top:6px; background:#f0f4f8; border-radius:8px; padding:4px;">
+                                    <button type="button" class="btn-mode-total"
+                                        onclick="setModeQtySungkup(this, 'total')"
+                                        style="flex:1; padding:9px 16px; border:none; border-radius:6px;
+                                        background:#1a6ef5; color:#fff; font-family:Arial,sans-serif;
+                                        font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s;">
+                                        Total
+                                    </button>
+                                    <button type="button" class="btn-mode-stapel"
+                                        onclick="setModeQtySungkup(this, 'stapel')"
+                                        style="flex:1; padding:9px 16px; border:none; border-radius:6px;
+                                        background:transparent; color:#64748b; font-family:Arial,sans-serif;
+                                        font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s;">
+                                        Per Stapel
+                                    </button>
+                                </div>
+                                <input type="hidden" class="f-mode-qty-value" value="total">
+                            </div>
+                        </div>
+
+                        <div class="f-mode-total">
+                            <div class="form-grid" style="margin-bottom:14px;">
+                                <div class="field">
+                                    <label>Kuantum Total (ton)</label>
+                                    <input type="number" class="f-qty" min="0" step="0.01" placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="f-mode-stapel" style="display:none;">
+                            <div class="f-stapel-list" style="margin-bottom:8px;">
+                                <div class="stapel-row form-grid" style="margin-bottom:10px;">
+                                    <div class="field">
+                                        <label>Stapel 1 (ton)</label>
+                                        <input type="number" class="f-stapel-input" min="0" step="0.01"
+                                            placeholder="0.00" oninput="hitungTotalStapelSungkup(this)">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="tambahStapelSungkup(this)"
+                                style="background:var(--primary-light); color:var(--primary);
+                                border:1.5px dashed var(--primary); border-radius:8px; padding:8px 16px;
+                                font-family:Arial,sans-serif; font-size:13px; font-weight:700;
+                                cursor:pointer; width:100%; margin-bottom:12px; transition:all 0.2s;">
+                                + Tambah Stapel
+                            </button>
+                            <div style="padding:10px 14px; background:#f0f4f8; border-radius:8px;
+                                border-left:3px solid #1a6ef5; display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                                <span style="font-size:12px; font-weight:600; color:#64748b;">Total Kuantum</span>
+                                <span class="f-total-stapel" style="font-size:16px; font-weight:800; color:#1a6ef5;">0,00 ton</span>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="field">
+                                <label>Broken Space (m³)</label>
+                                <input type="number" class="f-broken-m3" min="0" step="0.01"
+                                    placeholder="0.00" oninput="onBrokenM3ChangeSungkup(this)">
+                            </div>
+                            <div class="field">
+                                <label>Stowage Factor (m³/ton)</label>
+                                <input type="number" class="f-stowage" min="0" step="0.01"
+                                    placeholder="0.00" readonly>
+                            </div>
+                            <div class="field">
+                                <label>Broken Space (ton)</label>
+                                <input type="number" class="f-broken-ton" placeholder="otomatis" readonly>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <button type="button" onclick="tambahSungkup()"
+                    style="background:var(--primary-light); color:var(--primary);
+                    border:1.5px dashed var(--primary); border-radius:var(--radius); padding:12px 16px;
+                    font-family:Arial,sans-serif; font-size:14px; font-weight:700;
+                    cursor:pointer; width:100%; margin-bottom:14px; transition:all 0.2s;">
+                    + Tambah Sungkup
+                </button>
+
+                <section class="card">
+                    <div class="card-label">Dosis Fumigan</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="f-fumigan">Jenis Fumigan</label>
+                            <select id="f-fumigan" onchange="onFumiganChange()">
+                                <option value="phostek">Phostek 56 TB</option>
+                                <option value="deliciagastoxin">Delicia Gastoxin 56 TB</option>
+                                <option value="quickphos">Quickphos 56 TB</option>
+                                <option value="shenphos">Shenphos 57 TB</option>
+                                <option value="fumiphos">Fumiphos 56 TB</option>
+                                <option value="custom">Lainnya (manual)</option>
+                            </select>
+                        </div>
+                        <div class="field" id="f-fumigan-custom-field" style="display:none;">
+                            <label for="f-fumigan-custom-nama">Nama Fumigan</label>
+                            <input type="text" id="f-fumigan-custom-nama" placeholder="Masukkan nama fumigan">
+                        </div>
+                        <div class="field">
+                            <label for="f-dosis">Dosis (tablet/ton)</label>
+                            <input type="number" id="f-dosis" min="0" step="0.1" value="2" placeholder="0.0">
+                        </div>
+                    </div>
+                </section>
+
+                <button class="btn-hitung" onclick="hitungFumigasi()">Hitung Fumigasi</button>
+                <button class="btn-reset" onclick="resetForm('fumigasi')">↺ Reset</button>
+
+                <section class="result-card" id="hasil-fumigasi">
+                    <div class="card-label">Hasil Perhitungan Fumigasi</div>
+                    <div class="result-info" id="f-resultInfo"></div>
+                    <div id="f-hasil-list"></div>
+                </section>
+                <button class="btn-download" id="btn-dl-fumigasi" style="display:none;" onclick="downloadPDF('fumigasi')">⬇ Download PDF Fumigasi</button>
+
+            </div>
+
+            <!-- ======================== -->
+            <!--   FUMIGASI SF SECTION    -->
+            <!-- ======================== -->
+            <div id="tab-fumigasi-sf" style="display:none;">
+
+                <section class="card">
+                    <div class="card-label">01 — Informasi Komoditas</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="sf-commodity">Jenis Komoditi</label>
+                            <select id="sf-commodity" onchange="onKomoditasSFChange()">
+                                <option value="beras">Beras</option>
+                                <option value="gabah">Gabah</option>
+                                <option value="jagung">Jagung</option>
+                                <option value="kedelai">Kedelai</option>
+                                <option value="custom">Lainnya (manual)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="sf-qty">Kuantum Tonase (ton)</label>
+                            <input type="number" id="sf-qty" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-label">02 — Volume Total</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="sf-broken-m3">Volume Total di Dalam Sungkup (m³)</label>
+                            <input type="number" id="sf-broken-m3" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label for="sf-stowage">Stowage Factor (m³/ton)</label>
+                            <input type="number" id="sf-stowage" min="0" step="0.01" placeholder="0.00" readonly>
+                        </div>
+                    </div>
+                    <p style="font-size:12px; color:#64748b; margin-top:10px; padding:10px 12px; background:#f0f4f8; border-radius:8px; border-left:3px solid #1a6ef5;">
+                        Volume total di dalam sungkup
+                </section>
+
+                <section class="card">
+                    <div class="card-label">03 — Dosis Fumigan</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="sf-obat">Jenis Fumigan</label>
+                            <select id="sf-obat" onchange="onObatSFChange()">
+                                <option value="indofum">Indofum</option>
+                                <option value="custom">Lainnya (manual)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="sf-dosis">Dosis (g/m³)</label>
+                            <input type="number" id="sf-dosis" value="18" readonly>
+                        </div>
+                    </div>
+                </section>
+
+                <button class="btn-hitung" onclick="hitungFumigaziSF()">Hitung Fumigasi SF</button>
+                <button class="btn-reset" onclick="resetForm('fumigasi-sf')">↺ Reset</button>
+
+                <section class="result-card" id="hasil-fumigasi-sf">
+                    <div class="card-label">Hasil Perhitungan Fumigasi SF</div>
+                    <div class="result-info" id="sf-resultInfo"></div>
+                    <div class="result-grid">
+                        <div class="result-item highlight">
+                            <div class="result-label">Kuantum Tonase (informasi)</div>
+                            <div class="result-value" id="sf-resTumpukanM3">—</div>
+                        </div>
+                        <div class="result-item highlight">
+                            <div class="result-label">Volume Total Sungkup (m³)</div>
+                            <div class="result-value" id="sf-resBroken">—</div>
+                        </div>
+                        <div class="result-item highlight">
+                            <div class="result-label">Volume Total Sungkup</div>
+                            <div class="result-value" id="sf-resTotalM3">—</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Dosis Obat</div>
+                            <div class="result-value" id="sf-resDosis">—</div>
+                        </div>
+                        <div class="result-item highlight">
+                            <div class="result-label">Total Obat Dibutuhkan (Volume × Dosis)</div>
+                            <div class="result-value" id="sf-resTotal">— g</div>
+                        </div>
+                    </div>
+                </section>
+                <button class="btn-download" id="btn-dl-fumigasi-sf" style="display:none;" onclick="downloadPDF('fumigasi-sf')">⬇ Download PDF Fumigasi SF</button>
+
+            </div>
+
+            <!-- ======================== -->
+            <!--     SPRAYING SECTION     -->
+            <!-- ======================== -->
+            <div id="tab-spraying" style="display:none;">
+
+                <section class="card">
+                    <div class="card-label">01 — Informasi Komoditas</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="s-commodity">Jenis Komoditi</label>
+                            <select id="s-commodity">
+                                <option value="beras">Beras</option>
+                                <option value="gabah">Gabah</option>
+                                <option value="jagung">Jagung</option>
+                                <option value="kedelai">Kedelai</option>
+                                <option value="custom">Lainnya (manual)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="s-stapel">Kuantum Stapel (ton)</label>
+                            <input type="number" id="s-stapel" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-label">02 — Dimensi Gudang</div>
+                    <div class="form-grid three-col">
+                        <div class="field">
+                            <label for="s-panjang">Panjang Gudang (m)</label>
+                            <input type="number" id="s-panjang" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label for="s-lebar">Lebar Gudang (m)</label>
+                            <input type="number" id="s-lebar" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label for="s-tinggi">Tinggi Gudang (m)</label>
+                            <input type="number" id="s-tinggi" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="margin-top:14px;">
+                        <div class="field">
+                            <label for="s-teras">Lebar Teras (m)</label>
+                            <input type="number" id="s-teras" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label for="s-sisi-panjang">Jumlah Sisi Teras Memanjang</label>
+                            <input type="number" id="s-sisi-panjang" min="0" max="4" step="1" placeholder="0">
+                        </div>
+                        <div class="field">
+                            <label for="s-sisi-lebar">Jumlah Sisi Teras Melebar</label>
+                            <input type="number" id="s-sisi-lebar" min="0" max="4" step="1" placeholder="0">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-label">03 — Dosis Spraying</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="s-insektisida">Jenis Insektisida</label>
+                            <select id="s-insektisida" onchange="onInsektisidaChange('s')">
+                                <option value="alfastore">Alfastore 30 EC</option>
+                                <option value="bestrin">Bestrin Forte 100 EC</option>
+                                <option value="stolium">Stolium 30 EC</option>
+                                <option value="tribola">Tribola 500 EC</option>
+                                <option value="silogud">Silogud 250 EC</option>
+                                <option value="silamda">Silamda 25 EC</option>
+                                <option value="custom">Lainnya (manual)</option>
+                            </select>
+                        </div>
+                        <div class="field" id="s-insektisida-custom-field" style="display:none;">
+                            <label for="s-insektisida-custom-nama">Nama Insektisida</label>
+                            <input type="text" id="s-insektisida-custom-nama" placeholder="Masukkan nama insektisida">
+                        </div>
+                        <div class="field">
+                            <label for="s-dosis">Dosis (ml/m²)</label>
+                            <input type="number" id="s-dosis" min="0" step="0.01" value="0.25" readonly>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-label">04 — Opsional</div>
+                    <div class="field">
+                        <input type="checkbox" id="s-lingkungan" style="display:none;">
+                        <div id="s-lingkungan-label"
+                            style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:14px 16px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; transition:all 0.2s;">
+                            <div id="s-lingkungan-box" style="width:22px; height:22px; border:2px solid #e2e8f0; border-radius:6px; background:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.2s;">
+                                <span id="s-lingkungan-check" style="display:none; color:#fff; font-size:14px; font-weight:700;">✓</span>
+                            </div>
+                            <div>
+                                <div style="font-size:14px; font-weight:700; color:#1a202c;">Penambahan spraying lingkungan (+10%)</div>
+                                <div style="font-size:12px; color:#64748b; margin-top:3px;">Jika dicentang, total luas sasaran × 1,1</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-label">Rincian Area Sasaran</div>
+                    <table class="rincian-table">
+                        <thead>
+                            <tr>
+                                <th>Komponen</th>
+                                <th>Rumus</th>
+                                <th>Luas (m²)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Dinding memanjang luar/dalam</td>
+                                <td id="r-dinding-panjang-rumus">—</td>
+                                <td id="r-dinding-panjang">—</td>
+                            </tr>
+                            <tr>
+                                <td>Dinding melebar luar/dalam</td>
+                                <td id="r-dinding-lebar-rumus">—</td>
+                                <td id="r-dinding-lebar">—</td>
+                            </tr>
+                            <tr>
+                                <td>Atap dan lantai gudang</td>
+                                <td id="r-atap-rumus">—</td>
+                                <td id="r-atap">—</td>
+                            </tr>
+                            <tr>
+                                <td>Teras gudang</td>
+                                <td id="r-teras-rumus">—</td>
+                                <td id="r-teras">—</td>
+                            </tr>
+                            <tr>
+                                <td>Permukaan stapel</td>
+                                <td id="r-stapel-rumus">—</td>
+                                <td id="r-stapel">—</td>
+                            </tr>
+                            <tr class="row-subtotal">
+                                <td colspan="2">Subtotal</td>
+                                <td id="r-subtotal">—</td>
+                            </tr>
+                            <tr class="row-kurang">
+                                <td>Lantai tidak dispraying</td>
+                                <td id="r-lantai-rumus">—</td>
+                                <td id="r-lantai">—</td>
+                            </tr>
+                            <tr class="row-total">
+                                <td colspan="2">Total Sasaran</td>
+                                <td id="r-total">—</td>
+                            </tr>
+                            <tr class="row-lingkungan" id="r-row-lingkungan" style="display:none;">
+                                <td colspan="2">Faktor Lingkungan (+10%)</td>
+                                <td id="r-lingkungan">—</td>
+                            </tr>
+                            <tr class="row-final" id="r-row-final" style="display:none;">
+                                <td colspan="2"><strong>Total Sasaran + Lingkungan</strong></td>
+                                <td id="r-total-final">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <button class="btn-hitung" onclick="hitungSpraying()">Hitung Spraying</button>
+                <button class="btn-reset" onclick="resetForm('spraying')">↺ Reset</button>
+
+                <section class="result-card" id="hasil-spraying">
+                    <div class="card-label">Hasil Perhitungan Spraying</div>
+                    <div class="result-info" id="s-resultInfo"></div>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-label">Dinding Memanjang</div>
+                            <div class="result-value" id="s-resDindingP">—</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Dinding Melebar</div>
+                            <div class="result-value" id="s-resDindingL">—</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Atap & Lantai</div>
+                            <div class="result-value" id="s-resAtap">—</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Teras</div>
+                            <div class="result-value" id="s-resTeras">—</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Permukaan Stapel</div>
+                            <div class="result-value" id="s-resStapel">—</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Lantai Tidak Dispraying</div>
+                            <div class="result-value" id="s-resLantai">—</div>
+                        </div>
+                        <div class="result-item highlight">
+                            <div class="result-label">Total Sasaran</div>
+                            <div class="result-value" id="s-resTotal">— m²</div>
+                        </div>
+                        <div class="result-item highlight">
+                            <div class="result-label">Total Pestisida Dibutuhkan</div>
+                            <div class="result-value" id="s-resPestisida">— ml</div>
+                        </div>
+                    </div>
+                    <div class="result-item larutan-box" style="margin-top:10px;">
+                        <div class="larutan-header">Kebutuhan Larutan</div>
+                        <div class="larutan-grid">
+                            <div>
+                                <div class="result-label">Kebutuhan Insektisida</div>
+                                <div class="result-value larutan-value" id="s-resInsektisida">— ml</div>
+                            </div>
+                            <div>
+                                <div class="result-label">Air Pelarut</div>
+                                <div class="result-value larutan-value" id="s-resAir">— ml</div>
+                            </div>
+                            <div>
+                                <div class="result-label">Total Larutan</div>
+                                <div class="result-value larutan-value" id="s-resLarutan">— ml</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <button class="btn-download" id="btn-dl-spraying" style="display:none;" onclick="downloadPDF('spraying')">⬇ Download PDF Spraying</button>
+            </div>
+
+            <!-- ======================== -->
+            <!--     FOGGING SECTION      -->
+            <!-- ======================== -->
+            <div id="tab-fogging" style="display:none;">
+
+                <section class="card">
+                    <div class="card-label">01 — Informasi Komoditas</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="fg-commodity">Jenis Komoditi</label>
+                            <select id="fg-commodity">
+                                <option value="beras">Beras</option>
+                                <option value="gabah">Gabah</option>
+                                <option value="jagung">Jagung</option>
+                                <option value="kedelai">Kedelai</option>
+                                <option value="custom">Lainnya (manual)</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-label">02 — Dimensi Gudang</div>
+                    <div class="form-grid three-col">
+                        <div class="field">
+                            <label for="fg-panjang">Panjang Gudang (m)</label>
+                            <input type="number" id="fg-panjang" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label for="fg-lebar">Lebar Gudang (m)</label>
+                            <input type="number" id="fg-lebar" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label for="fg-tinggi">Tinggi Gudang (m)</label>
+                            <input type="number" id="fg-tinggi" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-grid" style="margin-top:14px;">
+                        <div class="field">
+                            <label for="fg-teras">Lebar Teras (m)</label>
+                            <input type="number" id="fg-teras" min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="field">
+                            <label for="fg-sisi-panjang">Jumlah Sisi Teras Memanjang</label>
+                            <input type="number" id="fg-sisi-panjang" min="0" max="4" step="1" placeholder="0">
+                        </div>
+                        <div class="field">
+                            <label for="fg-sisi-lebar">Jumlah Sisi Teras Melebar</label>
+                            <input type="number" id="fg-sisi-lebar" min="0" max="4" step="1" placeholder="0">
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-label">03 — Dosis Fogging</div>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="fg-insektisida">Jenis Insektisida</label>
+                            <select id="fg-insektisida" onchange="onInsektisidaChange('fg')">
+                                <option value="alfastore">Alfastore 30 EC</option>
+                                <option value="bestrin">Bestrin Forte 100 EC</option>
+                                <option value="stolium">Stolium 30 EC</option>
+                                <option value="tribola">Tribola 500 EC</option>
+                                <option value="silogud">Silogud 250 EC</option>
+                                <option value="silamda">Silamda 25 EC</option>
+                                <option value="custom">Lainnya (manual)</option>
+                            </select>
+                        </div>
+                        <div class="field" id="fg-insektisida-custom-field" style="display:none;">
+                            <label for="fg-insektisida-custom-nama">Nama Insektisida</label>
+                            <input type="text" id="fg-insektisida-custom-nama" placeholder="Masukkan nama insektisida">
+                        </div>
+                        <div class="field">
+                            <label for="fg-dosis">Dosis (ml/m²)</label>
+                            <input type="number" id="fg-dosis" value="0.025" readonly>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <div class="card-label">Rincian Area Sasaran</div>
+                    <table class="rincian-table">
+                        <thead>
+                            <tr>
+                                <th>Komponen</th>
+                                <th>Rumus</th>
+                                <th>Luas (m²)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Lantai gudang</td>
+                                <td id="fg-r-lantai-rumus">—</td>
+                                <td id="fg-r-lantai">—</td>
+                            </tr>
+                            <tr>
+                                <td>Teras gudang</td>
+                                <td id="fg-r-teras-rumus">—</td>
+                                <td id="fg-r-teras">—</td>
+                            </tr>
+                            <tr class="row-total">
+                                <td colspan="2">Total Luas Sasaran</td>
+                                <td id="fg-r-total">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <button class="btn-hitung" onclick="hitungFogging()">Hitung Fogging</button>
+                <button class="btn-reset" onclick="resetForm('fogging')">↺ Reset</button>
+
+                <section class="result-card" id="hasil-fogging">
+                    <div class="card-label">Hasil Perhitungan Fogging</div>
+                    <div class="result-info" id="fg-resultInfo"></div>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <div class="result-label">Lantai Gudang</div>
+                            <div class="result-value" id="fg-resLantai">—</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Teras Gudang</div>
+                            <div class="result-value" id="fg-resTeras">—</div>
+                        </div>
+                        <div class="result-item highlight">
+                            <div class="result-label">Total Luas Sasaran</div>
+                            <div class="result-value" id="fg-resTotal">— m²</div>
+                        </div>
+                        <div class="result-item highlight">
+                            <div class="result-label">Total Insektisida Dibutuhkan</div>
+                            <div class="result-value" id="fg-resPestisida">— ml</div>
+                        </div>
+                    </div>
+                    <div class="result-item larutan-box" style="margin-top:10px;">
+                        <div class="larutan-header">Kebutuhan Larutan</div>
+                        <div class="larutan-grid">
+                            <div>
+                                <div class="result-label">Kebutuhan Insektisida</div>
+                                <div class="result-value larutan-value" id="fg-resInsektisida">— ml</div>
+                            </div>
+                            <div>
+                                <div class="result-label">Air Pelarut</div>
+                                <div class="result-value larutan-value" id="fg-resAir">— ml</div>
+                            </div>
+                            <div>
+                                <div class="result-label">Total Larutan</div>
+                                <div class="result-value larutan-value" id="fg-resLarutan">— ml</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <button class="btn-download" id="btn-dl-fogging" style="display:none;" onclick="downloadPDF('fogging')">⬇ Download PDF Fogging</button>
+
+            </div>
+
+        </main>
+
+        <footer>
+            <p>Fumigasi & Spraying Calculator &copy; 2026</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+    <script src="auth.js"></script>
+</body>
+</html>
