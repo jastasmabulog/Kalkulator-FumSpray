@@ -731,15 +731,28 @@ function onKomoditasSFChange() {
 }
 
 function onObatSFChange() {
-    const obat  = document.getElementById('sf-obat').value;
-    const input = document.getElementById('sf-dosis');
-    if (obat === 'indofum') {
-        input.value    = 18;
-        input.readOnly = true;
+    const select = document.getElementById('sf-obat');
+    const customField = document.getElementById('sf-obat-custom-field');
+    const dosisInput = document.getElementById('sf-dosis');
+
+    if (select.value === 'custom') {
+        // tampilkan input nama
+        customField.style.display = 'block';
+
+        // aktifkan edit dosis
+        dosisInput.readOnly = false;
+        dosisInput.value = '';
+
     } else {
-        input.value    = '';
-        input.readOnly = false;
-        input.focus();
+        // sembunyikan input nama
+        customField.style.display = 'none';
+
+        // kembalikan default
+        dosisInput.readOnly = true;
+
+        if (select.value === 'indofum') {
+            dosisInput.value = 18;
+        }
     }
 }
 

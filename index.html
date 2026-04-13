@@ -55,7 +55,7 @@
                             <input type="text" id="f-kancab" placeholder="Nama Kantor Cabang">
                         </div>
                         <div class="field">
-                            <label for="f-gudang">Gudang</label>
+                            <label for="f-gudang">Kompleks Gudang</label>
                             <input type="text" id="f-gudang" placeholder="Nama Gudang">
                         </div>
                         <div class="field">
@@ -253,7 +253,7 @@
                             <input type="text" id="sf-kancab" placeholder="Nama Kantor Cabang">
                         </div>
                         <div class="field">
-                            <label for="sf-gudang">Gudang</label>
+                            <label for="sf-gudang">Kompleks Gudang</label>
                             <input type="text" id="sf-gudang" placeholder="Nama Gudang">
                         </div>
                         <div class="field">
@@ -303,6 +303,7 @@
                 <section class="card">
                     <div class="card-label">Dosis Fumigan</div>
                     <div class="form-grid">
+
                         <div class="field">
                             <label for="sf-obat">Jenis Fumigan</label>
                             <select id="sf-obat" onchange="onObatSFChange()">
@@ -310,10 +311,19 @@
                                 <option value="custom">Lainnya (manual)</option>
                             </select>
                         </div>
+
+                        <!-- INPUT CUSTOM NAMA -->
+                        <div class="field" id="sf-obat-custom-field" style="display:none;">
+                            <label>Nama Fumigan</label>
+                            <input type="text" id="sf-obat-custom-nama" placeholder="Masukkan nama fumigan">
+                        </div>
+
+                        <!-- DOSIS -->
                         <div class="field">
                             <label for="sf-dosis">Dosis (g/m³)</label>
                             <input type="number" id="sf-dosis" value="18" readonly>
                         </div>
+
                     </div>
                 </section>
 
@@ -370,7 +380,7 @@
                             <input type="text" id="s-kancab" placeholder="Nama Kantor Cabang">
                         </div>
                         <div class="field">
-                            <label for="s-gudang">Gudang</label>
+                            <label for="s-gudang">Kompleks Gudang</label>
                             <input type="text" id="s-gudang" placeholder="Nama Gudang">
                         </div>
                         <div class="field">
@@ -618,7 +628,7 @@
                             <input type="text" id="fg-kancab" placeholder="Nama Kantor Cabang">
                         </div>
                         <div class="field">
-                            <label for="fg-gudang">Gudang</label>
+                            <label for="fg-gudang">Kompleks Gudang</label>
                             <input type="text" id="fg-gudang" placeholder="Nama Gudang">
                         </div>
                         <div class="field">
