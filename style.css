@@ -641,3 +641,24 @@ footer {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0,168,120,0.4);
 }
+
+.btn-log {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #d13636, #e2531a);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(0,168,120,0.3);
+}

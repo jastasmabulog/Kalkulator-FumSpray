@@ -314,8 +314,26 @@ function hitungFumigasi() {
     const cards     = document.querySelectorAll('#f-sungkup-list section[data-sungkup]');
     const hasilList = document.getElementById('f-hasil-list');
 
+    // lokasi
+    const kanwil    = document.getElementById('f-kanwil').value || '—';
+    const kancab    = document.getElementById('f-kancab').value || '—';
+    const gudang    = document.getElementById('f-gudang').value || '—';
+    const unitGudang = document.getElementById('f-unit-gudang').value || '—';
+
+    document.getElementById('f-lokasi-info').innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
+            <span class="info-tag">${kanwil}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${kancab}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${gudang}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${unitGudang}</span>
+        </div>`;
+
     hasilList.innerHTML = '';
     let infoHTML = '';
+    let totalQtyAll = 0, totalBrokenAll = 0, totalTabletAll = 0;
 
     cards.forEach((card, idx) => {
         const kode      = card.querySelector('.f-kode-sungkup').value || `S-0${idx+1}`;
@@ -326,6 +344,10 @@ function hitungFumigasi() {
         const totalTon  = qty + brokenTon;
         const tablet    = totalTon * dosis;
         const bulat     = Math.ceil(tablet);
+
+        totalQtyAll    += qty;
+        totalBrokenAll += brokenTon;
+        totalTabletAll += bulat;
 
         infoHTML += `<span class="info-tag">${kode}</span><span class="info-sep">·</span>`;
 
@@ -367,6 +389,19 @@ function hitungFumigasi() {
 
     document.getElementById('f-resultInfo').innerHTML =
         infoHTML + `<span class="info-tag">${fumiganNama}</span>`;
+
+    // total gabungan
+    const totalAll = totalQtyAll + totalBrokenAll;
+    const gabungan = document.getElementById('f-total-gabungan');
+    if (cards.length > 1) {
+        gabungan.style.display = 'block';
+        document.getElementById('f-res-total-qty').textContent     = fmt(totalQtyAll) + ' ton';
+        document.getElementById('f-res-total-broken').textContent  = fmt(totalBrokenAll) + ' ton';
+        document.getElementById('f-res-total-ton').textContent     = fmt(totalAll) + ' ton';
+        document.getElementById('f-res-total-tablet').textContent  = totalTabletAll.toLocaleString('id-ID') + ' tablet';
+    } else {
+        gabungan.style.display = 'none';
+    }
 
     tampilkanHasil('hasil-fumigasi');
     document.getElementById('btn-dl-fumigasi').style.display = 'flex';
@@ -594,6 +629,21 @@ function hitungSpraying() {
     document.getElementById('s-resAir').textContent         = fmtMl(29.75 * luasFinal);
     document.getElementById('s-resLarutan').textContent     = fmtMl(30 * luasFinal);
 
+    const sKanwil = document.getElementById('s-kanwil').value || '—';
+    const sKancab = document.getElementById('s-kancab').value || '—';
+    const sGudang = document.getElementById('s-gudang').value || '—';
+    const sUnit   = document.getElementById('s-unit-gudang').value || '—';
+    document.getElementById('s-lokasi-info').innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
+            <span class="info-tag">${sKanwil}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${sKancab}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${sGudang}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${sUnit}</span>
+        </div>`;
+
     tampilkanHasil('hasil-spraying');
     document.getElementById('btn-dl-spraying').style.display = 'flex';
 }
@@ -642,6 +692,21 @@ function hitungFogging() {
     document.getElementById('fg-resInsektisida').textContent = fmtFog(totalMl);
     document.getElementById('fg-resAir').textContent         = fmtFog(total - totalMl);
     document.getElementById('fg-resLarutan').textContent     = fmtFog(total * 1);
+
+    const fgKanwil = document.getElementById('fg-kanwil').value || '—';
+    const fgKancab = document.getElementById('fg-kancab').value || '—';
+    const fgGudang = document.getElementById('fg-gudang').value || '—';
+    const fgUnit   = document.getElementById('fg-unit-gudang').value || '—';
+    document.getElementById('fg-lokasi-info').innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
+            <span class="info-tag">${fgKanwil}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${fgKancab}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${fgGudang}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${fgUnit}</span>
+        </div>`;
 
     tampilkanHasil('hasil-fogging');
     document.getElementById('btn-dl-fogging').style.display = 'flex';
@@ -706,6 +771,21 @@ function hitungFumigaziSF() {
     document.getElementById('sf-resTotal').textContent      =
         fmt(bulatG, 1) + ' g (' + fmt(bulatKg, 1) + ' kg)';
 
+    const sfKanwil = document.getElementById('sf-kanwil').value || '—';
+    const sfKancab = document.getElementById('sf-kancab').value || '—';
+    const sfGudang = document.getElementById('sf-gudang').value || '—';
+    const sfUnit   = document.getElementById('sf-unit-gudang').value || '—';
+    document.getElementById('sf-lokasi-info').innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
+            <span class="info-tag">${sfKanwil}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${sfKancab}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${sfGudang}</span>
+            <span class="info-sep">·</span>
+            <span class="info-tag">${sfUnit}</span>
+        </div>`;
+
     tampilkanHasil('hasil-fumigasi-sf');
     document.getElementById('btn-dl-fumigasi-sf').style.display = 'flex';
 }
@@ -730,9 +810,13 @@ function tampilkanHasil(id) {
 }
 
 function resetForm(tab) {
-    if (tab === 'fumigasi') {
+    if (tab === 'fumigasi')
+        ['f-kanwil','f-kancab','f-gudang','f-unit-gudang'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('f-total-gabungan').style.display = 'none';
+    {
         resetFumigasi();
     }
+    
     if (tab === 'spraying') {
         ['s-panjang','s-lebar','s-tinggi','s-teras','s-sisi-panjang',
          's-sisi-lebar','s-stapel'].forEach(id => document.getElementById(id).value = '');
@@ -751,6 +835,7 @@ function resetForm(tab) {
          'r-stapel-rumus','r-lantai-rumus'].forEach(id => document.getElementById(id).textContent = '—');
         document.getElementById('hasil-spraying').classList.remove('visible');
         document.getElementById('btn-dl-spraying').style.display = 'none';
+        ['s-kanwil','s-kancab','s-gudang','s-unit-gudang'].forEach(id => document.getElementById(id).value = '');
     }
     if (tab === 'fogging') {
         ['fg-panjang','fg-lebar','fg-tinggi','fg-teras',
@@ -765,6 +850,7 @@ function resetForm(tab) {
          'fg-r-lantai-rumus','fg-r-teras-rumus'].forEach(id => document.getElementById(id).textContent = '—');
         document.getElementById('hasil-fogging').classList.remove('visible');
         document.getElementById('btn-dl-fogging').style.display = 'none';
+        ['fg-kanwil','fg-kancab','fg-gudang','fg-unit-gudang'].forEach(id => document.getElementById(id).value = '');
     }
     if (tab === 'fumigasi-sf') {
         document.getElementById('sf-qty').value       = '';
@@ -775,6 +861,7 @@ function resetForm(tab) {
         onObatSFChange();
         document.getElementById('hasil-fumigasi-sf').classList.remove('visible');
         document.getElementById('btn-dl-fumigasi-sf').style.display = 'none';
+        ['sf-kanwil','sf-kancab','sf-gudang','sf-unit-gudang'].forEach(id => document.getElementById(id).value = '');
     }
 }
 
