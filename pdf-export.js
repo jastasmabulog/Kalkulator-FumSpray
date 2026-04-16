@@ -22,8 +22,6 @@ function downloadPDF(tab) {
         doc.setFontSize(16);
         doc.text(title, 14, y);
         y += 8;
-        doc.setDrawColor(26, 110, 245);
-        doc.setLineWidth(0.5);
         doc.line(14, y, 196, y);
         y += 8;
     };
@@ -36,12 +34,13 @@ function downloadPDF(tab) {
         }
         doc.setTextColor(100, 116, 139);
         doc.setFontSize(8);
-        doc.setFont('helvetica', 'normal');
         doc.text(label, 16, y);
+
         doc.setTextColor(26, 32, 44);
         doc.setFontSize(10);
         doc.setFont('helvetica', 'bold');
         doc.text(String(value), 196, y, { align: 'right' });
+
         y += 10;
     };
 
@@ -52,7 +51,6 @@ function downloadPDF(tab) {
         doc.rect(14, y - 5, 182, 8, 'F');
         doc.setTextColor(26, 110, 245);
         doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
         doc.text(title.toUpperCase(), 16, y);
         y += 8;
     };
@@ -64,7 +62,6 @@ function downloadPDF(tab) {
         doc.rect(14, y - 5, 182, 8, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
         doc.text(title.toUpperCase(), 16, y);
         y += 8;
     };
@@ -123,8 +120,8 @@ function downloadPDF(tab) {
 
         const cards = document.querySelectorAll('#f-sungkup-list section[data-sungkup]');
         cards.forEach((card, idx) => {
-            const kode     = card.querySelector('.f-kode-sungkup').value || `S-0${idx+1}`;
-            const komoEl   = card.querySelector('.f-commodity');
+            const kode = card.querySelector('.f-kode-sungkup').value || `S-0${idx+1}`;
+            const komoEl = card.querySelector('.f-commodity');
             const komoditi = komoEl.options[komoEl.selectedIndex].text;
             const hasilDiv = hasil.querySelectorAll('#f-hasil-list .result-grid')[idx];
 
@@ -151,11 +148,12 @@ function downloadPDF(tab) {
         }
 
         doc.save('hasil-fumigasi.pdf');
+    }
 
     // ==============================
     // FUMIGASI SF
     // ==============================
-    } else if (tab === 'fumigasi-sf') {
+    else if (tab === 'fumigasi-sf') {
         const hasil = document.getElementById('hasil-fumigasi-sf');
         if (!hasil.classList.contains('visible')) {
             alert('Harap hitung dulu sebelum download PDF.');
@@ -191,11 +189,12 @@ function downloadPDF(tab) {
         addRow('Total Obat Dibutuhkan', document.getElementById('sf-resTotal').textContent, true);
 
         doc.save('hasil-fumigasi-sf.pdf');
+    }
 
     // ==============================
     // SPRAYING
     // ==============================
-    } else if (tab === 'spraying') {
+     else if (tab === 'spraying') {
         const hasil = document.getElementById('hasil-spraying');
         if (!hasil.classList.contains('visible')) {
             alert('Harap hitung dulu sebelum download PDF.');
@@ -273,3 +272,4 @@ function downloadPDF(tab) {
         doc.save('hasil-fogging.pdf');
     }
 }
+
