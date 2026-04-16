@@ -117,8 +117,7 @@ app.post("/login", async (req, res) => {
       message: "Server error",
     });
   }
-});
-
+}); 
 app.get("/kanwil", async (req, res) => {
   try {
     const result = await pool.query(
@@ -129,4 +128,8 @@ app.get("/kanwil", async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
