@@ -1,4 +1,4 @@
-const BASE_URL = "http://kalkulator-fum-spray.vercel.app";
+const BASE_URL = "https://kalkulator-fum-spray.vercel.app";
 
 // ================= LOAD KANWIL =================
 async function loadKanwil() {
