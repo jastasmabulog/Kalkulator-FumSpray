@@ -7,7 +7,16 @@ const jwt = require("jsonwebtoken");
 const pool = require("./db");
 
 const app = express();
-app.use(cors());
+
+// ================= PENGATURAN CORS BARU =================
+// Ini mengizinkan GitHub Pages kamu untuk mengakses backend ini
+app.use(cors({
+  origin: "https://jastasmabulog.github.io", 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+// ========================================================
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -118,6 +127,7 @@ app.post("/login", async (req, res) => {
     });
   }
 }); 
+
 app.get("/kanwil", async (req, res) => {
   try {
     const result = await pool.query(
@@ -133,4 +143,5 @@ app.get("/kanwil", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
 module.exports = app;
