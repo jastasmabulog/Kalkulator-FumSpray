@@ -10,11 +10,7 @@ const app = express();
 
 // ================= PENGATURAN CORS BARU =================
 // Ini mengizinkan GitHub Pages kamu untuk mengakses backend ini
-app.use(cors({
-  origin: "https://jastasmabulog.github.io", 
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+app.use(cors());
 // ========================================================
 
 app.use(express.json());
