@@ -667,19 +667,32 @@ function hitungFogging() {
         ? (document.getElementById('fg-insektisida-custom-nama').value || 'Custom')
         : insektisidaEl.options[insektisidaEl.selectedIndex].text;
 
-    const lantai    = p * l;
-    const terasArea = sisiPanjang * (p * teras) + sisiLebar * (l * teras);
-    const totalRaw  = lantai + terasArea;
-    const totalBase = pembulatanCustom(totalRaw);
-    const total     = lingkungan ? totalBase * 1.1 : totalBase;
-    const totalMl   = total * dosis;
+    const lantai           = p * l;
+    const terasArea        = sisiPanjang * (p * teras) + sisiLebar * (l * teras);
+    const totalBase        = pembulatanCustom(lantai + terasArea);
+    const tambahanLingkungan = totalBase * 0.1;
+    const totalFinal       = totalBase * 1.1;
+    const total            = lingkungan ? totalFinal : totalBase;
+    const totalMl          = total * dosis;
 
+    // tabel rincian
     document.getElementById('fg-r-lantai-rumus').textContent = `${p} × ${l}`;
     document.getElementById('fg-r-teras-rumus').textContent  = `${sisiPanjang}×(${p}×${teras}) + ${sisiLebar}×(${l}×${teras})`;
     document.getElementById('fg-r-lantai').textContent       = fmt(lantai) + ' m²';
     document.getElementById('fg-r-teras').textContent        = fmt(terasArea) + ' m²';
-    document.getElementById('fg-r-total').textContent        = fmt(total) + ' m²'
-        + (lingkungan ? ' (+10%)' : '');
+    document.getElementById('fg-r-total').textContent        = fmt(totalBase) + ' m²';
+
+    const rowLingkungan = document.getElementById('fg-r-row-lingkungan');
+    const rowFinal      = document.getElementById('fg-r-row-final');
+    if (lingkungan) {
+        rowLingkungan.style.display = '';
+        rowFinal.style.display      = '';
+        document.getElementById('fg-r-lingkungan').textContent  = '+ ' + fmt(tambahanLingkungan) + ' m²';
+        document.getElementById('fg-r-total-final').textContent = fmt(totalFinal) + ' m²';
+    } else {
+        rowLingkungan.style.display = 'none';
+        rowFinal.style.display      = 'none';
+    }
 
     document.getElementById('fg-resultInfo').innerHTML =
         `<span class="info-tag">${komoditi}</span>
@@ -691,11 +704,24 @@ function hitungFogging() {
 
     document.getElementById('fg-resLantai').textContent      = fmt(lantai) + ' m²';
     document.getElementById('fg-resTeras').textContent       = fmt(terasArea) + ' m²';
-    document.getElementById('fg-resTotal').textContent       = fmt(total) + ' m²';
+    document.getElementById('fg-resTotal').textContent       = fmt(totalBase) + ' m²';
     document.getElementById('fg-resPestisida').textContent   = fmtFog(totalMl);
     document.getElementById('fg-resInsektisida').textContent = fmtFog(totalMl);
     document.getElementById('fg-resAir').textContent         = fmtFog(total - totalMl);
-    document.getElementById('fg-resLarutan').textContent     = fmtFog(total * 1);
+    document.getElementById('fg-resLarutan').textContent     = fmtFog(total);
+
+    // baris lingkungan di hasil
+    const resRowLingkungan = document.getElementById('fg-res-row-lingkungan');
+    const resRowFinal      = document.getElementById('fg-res-row-final');
+    if (lingkungan) {
+        resRowLingkungan.style.display = '';
+        resRowFinal.style.display      = '';
+        document.getElementById('fg-resLingkungan').textContent  = '+ ' + fmt(tambahanLingkungan) + ' m²';
+        document.getElementById('fg-resTotalFinal').textContent  = fmt(totalFinal) + ' m²';
+    } else {
+        resRowLingkungan.style.display = 'none';
+        resRowFinal.style.display      = 'none';
+    }
 
     const fgKanwil = document.getElementById('fg-kanwil').value || '—';
     const fgKancab = document.getElementById('fg-kancab').value || '—';
@@ -866,15 +892,25 @@ function resetForm(tab) {
         document.getElementById('fg-insektisida-custom-nama').value = '';
         document.getElementById('fg-dosis').value    = '0.025';
         document.getElementById('fg-dosis').readOnly = true;
-        // reset checkbox lingkungan fogging
-        document.getElementById('fg-lingkungan').checked = false;
-        document.getElementById('fg-lingkungan-box').style.background    = '#fff';
-        document.getElementById('fg-lingkungan-box').style.borderColor   = '#e2e8f0';
-        document.getElementById('fg-lingkungan-check').style.display     = 'none';
-        document.getElementById('fg-lingkungan-label').style.borderColor = '#e2e8f0';
-        document.getElementById('fg-lingkungan-label').style.background  = '#f8fafc';
+        // reset checkbox lingkungan
+        document.getElementById('s-lingkungan').checked = false;
+        document.getElementById('s-lingkungan-box').style.background    = '#fff';
+        document.getElementById('s-lingkungan-box').style.borderColor   = '#e2e8f0';
+        document.getElementById('s-lingkungan-check').style.display     = 'none';
+        document.getElementById('s-lingkungan-label').style.borderColor = '#e2e8f0';
+        document.getElementById('s-lingkungan-label').style.background  = '#f8fafc';
+        // reset tabel rincian
         ['fg-r-lantai','fg-r-teras','fg-r-total',
          'fg-r-lantai-rumus','fg-r-teras-rumus'].forEach(id => document.getElementById(id).textContent = '—');
+        document.getElementById('fg-r-row-lingkungan').style.display  = 'none';
+        document.getElementById('fg-r-row-final').style.display       = 'none';
+        document.getElementById('fg-r-lingkungan').textContent        = '—';
+        document.getElementById('fg-r-total-final').textContent       = '—';
+        // reset hasil
+        document.getElementById('fg-res-row-lingkungan').style.display = 'none';
+        document.getElementById('fg-res-row-final').style.display      = 'none';
+        document.getElementById('fg-resLingkungan').textContent        = '—';
+        document.getElementById('fg-resTotalFinal').textContent        = '—';
         document.getElementById('hasil-fogging').classList.remove('visible');
         document.getElementById('btn-dl-fogging').style.display = 'none';
         ['fg-kanwil','fg-kancab','fg-gudang','fg-unit-gudang'].forEach(id => document.getElementById(id).value = '');
