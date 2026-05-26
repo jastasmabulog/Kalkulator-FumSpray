@@ -754,6 +754,14 @@
                                 <td colspan="2">Total Luas Sasaran</td>
                                 <td id="fg-r-total">—</td>
                             </tr>
+                            <tr class="row-lingkungan" id="fg-r-row-lingkungan" style="display:none;">
+                                <td colspan="2">Faktor Lingkungan (+10%)</td>
+                                <td id="fg-r-lingkungan">—</td>
+                            </tr>
+                            <tr class="row-final" id="fg-r-row-final" style="display:none;">
+                                <td colspan="2"><strong>Total Sasaran + Lingkungan</strong></td>
+                                <td id="fg-r-total-final">—</td>
+                            </tr>
                         </tbody>
                     </table>
                 </section>
@@ -775,9 +783,20 @@
                             <div class="result-label">Teras Gudang</div>
                             <div class="result-value" id="fg-resTeras">—</div>
                         </div>
+
                         <div class="result-item highlight">
-                            <div class="result-label">Total Luas Sasaran</div>
+                            <div class="result-label">Total Sasaran</div>
                             <div class="result-value" id="fg-resTotal">— m²</div>
+                        </div>
+                        
+                        <div class="result-item highlight" id="fg-res-row-lingkungan" style="display:none;">
+                            <div class="result-label">Faktor Lingkungan (+10%)</div>
+                            <div class="result-value" id="fg-resLingkungan">—</div>
+                        </div>
+
+                        <div class="result-item highlight" id="fg-res-row-final" style="display:none;">
+                            <div class="result-label">Total Sasaran + Lingkungan</div>
+                            <div class="result-value" id="fg-resTotalFinal">— m²</div>
                         </div>
                         <div class="result-item highlight">
                             <div class="result-label">Total Insektisida Dibutuhkan</div>
