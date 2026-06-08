@@ -426,18 +426,62 @@
                             <input type="number" id="s-tinggi" min="0" step="0.01" placeholder="0.00">
                         </div>
                     </div>
-                    <div class="form-grid" style="margin-top:14px;">
+
+                    <div class="field" style="margin-top:14px; margin-bottom:14px;">
+                        <input type="checkbox" id="s-teras-sama-cb" style="display:none;">
+                        <div id="s-teras-sama-label"
+                            style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px 16px;
+                            background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; transition:all 0.2s;"
+                            onclick="toggleTerasSama('s')">
+                            <div id="s-teras-sama-box" style="width:22px; height:22px; border:2px solid #e2e8f0;
+                                border-radius:6px; background:#fff; display:flex; align-items:center;
+                                justify-content:center; flex-shrink:0; transition:all 0.2s;">
+                                <span id="s-teras-sama-check" style="display:none; color:#fff; font-size:14px; font-weight:700;">✓</span>
+                            </div>
+                            <div>
+                                <div style="font-size:14px; font-weight:700; color:#1a202c;">Lebar Teras Memanjang = Melebar</div>
+                                <div style="font-size:12px; color:#64748b; margin-top:3px;">Centang jika lebar teras memanjang dan melebar sama</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DEFAULT: 2 textbox berbeda -->
+                    <div id="s-teras-beda-input">
+                        <div class="form-grid" style="margin-top:4px;">
+                            <div class="field">
+                                <label for="s-teras-memanjang">Lebar Teras Memanjang (m)</label>
+                                <input type="number" id="s-teras-memanjang" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="field">
+                                <label for="s-sisi-panjang">Jumlah Sisi Teras Memanjang</label>
+                                <input type="number" id="s-sisi-panjang" min="0" max="4" step="1" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top:8px;">
+                            <div class="field">
+                                <label for="s-teras-melebar">Lebar Teras Melebar (m)</label>
+                                <input type="number" id="s-teras-melebar" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="field">
+                                <label for="s-sisi-lebar">Jumlah Sisi Teras Melebar</label>
+                                <input type="number" id="s-sisi-lebar" min="0" max="4" step="1" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- JIKA DICENTANG: 1 textbox -->
+                    <div id="s-teras-sama-input" style="display:none;" class="form-grid" style="margin-top:4px;">
                         <div class="field">
                             <label for="s-teras">Lebar Teras (m)</label>
                             <input type="number" id="s-teras" min="0" step="0.01" placeholder="0.00">
                         </div>
                         <div class="field">
-                            <label for="s-sisi-panjang">Jumlah Sisi Teras Memanjang</label>
-                            <input type="number" id="s-sisi-panjang" min="0" max="4" step="1" placeholder="0">
+                            <label for="s-sisi-panjang-sama">Jumlah Sisi Teras Memanjang</label>
+                            <input type="number" id="s-sisi-panjang-sama" min="0" max="4" step="1" placeholder="0">
                         </div>
                         <div class="field">
-                            <label for="s-sisi-lebar">Jumlah Sisi Teras Melebar</label>
-                            <input type="number" id="s-sisi-lebar" min="0" max="4" step="1" placeholder="0">
+                            <label for="s-sisi-lebar-sama">Jumlah Sisi Teras Melebar</label>
+                            <input type="number" id="s-sisi-lebar-sama" min="0" max="4" step="1" placeholder="0">
                         </div>
                     </div>
                 </section>
@@ -670,18 +714,62 @@
                             <input type="number" id="fg-tinggi" min="0" step="0.01" placeholder="0.00">
                         </div>
                     </div>
-                    <div class="form-grid" style="margin-top:14px;">
+
+                    <div class="field" style="margin-top:14px; margin-bottom:14px;">
+                        <input type="checkbox" id="fg-teras-sama-cb" style="display:none;">
+                        <div id="fg-teras-sama-label"
+                            style="display:flex; align-items:center; gap:12px; cursor:pointer; padding:12px 16px;
+                            background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; transition:all 0.2s;"
+                            onclick="toggleTerasSama('fg')">
+                            <div id="fg-teras-sama-box" style="width:22px; height:22px; border:2px solid #e2e8f0;
+                                border-radius:6px; background:#fff; display:flex; align-items:center;
+                                justify-content:center; flex-shrink:0; transition:all 0.2s;">
+                                <span id="fg-teras-sama-check" style="display:none; color:#fff; font-size:14px; font-weight:700;">✓</span>
+                            </div>
+                            <div>
+                                <div style="font-size:14px; font-weight:700; color:#1a202c;">Lebar Teras Memanjang = Melebar</div>
+                                <div style="font-size:12px; color:#64748b; margin-top:3px;">Centang jika lebar teras memanjang dan melebar sama</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DEFAULT: 2 textbox berbeda -->
+                    <div id="fg-teras-beda-input">
+                        <div class="form-grid" style="margin-top:4px;">
+                            <div class="field">
+                                <label for="fg-teras-memanjang">Lebar Teras Memanjang (m)</label>
+                                <input type="number" id="fg-teras-memanjang" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="field">
+                                <label for="fg-sisi-panjang">Jumlah Sisi Teras Memanjang</label>
+                                <input type="number" id="fg-sisi-panjang" min="0" max="4" step="1" placeholder="0">
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top:8px;">
+                            <div class="field">
+                                <label for="fg-teras-melebar">Lebar Teras Melebar (m)</label>
+                                <input type="number" id="fg-teras-melebar" min="0" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="field">
+                                <label for="fg-sisi-lebar">Jumlah Sisi Teras Melebar</label>
+                                <input type="number" id="fg-sisi-lebar" min="0" max="4" step="1" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- JIKA DICENTANG: 1 textbox -->
+                    <div id="fg-teras-sama-input" style="display:none;" class="form-grid" style="margin-top:4px;">
                         <div class="field">
                             <label for="fg-teras">Lebar Teras (m)</label>
                             <input type="number" id="fg-teras" min="0" step="0.01" placeholder="0.00">
                         </div>
                         <div class="field">
-                            <label for="fg-sisi-panjang">Jumlah Sisi Teras Memanjang</label>
-                            <input type="number" id="fg-sisi-panjang" min="0" max="4" step="1" placeholder="0">
+                            <label for="fg-sisi-panjang-sama">Jumlah Sisi Teras Memanjang</label>
+                            <input type="number" id="fg-sisi-panjang-sama" min="0" max="4" step="1" placeholder="0">
                         </div>
                         <div class="field">
-                            <label for="fg-sisi-lebar">Jumlah Sisi Teras Melebar</label>
-                            <input type="number" id="fg-sisi-lebar" min="0" max="4" step="1" placeholder="0">
+                            <label for="fg-sisi-lebar-sama">Jumlah Sisi Teras Melebar</label>
+                            <input type="number" id="fg-sisi-lebar-sama" min="0" max="4" step="1" placeholder="0">
                         </div>
                     </div>
                 </section>
