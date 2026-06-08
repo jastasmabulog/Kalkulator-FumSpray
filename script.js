@@ -583,6 +583,7 @@ function hitungSpraying() {
     const stapel      = parseFloat(document.getElementById('s-stapel').value) || 0;
     const dosis       = parseFloat(document.getElementById('s-dosis').value) || 0;
     const lingkungan  = document.getElementById('s-lingkungan').checked;
+    
     const komoditiEl  = document.getElementById('s-commodity');
     const komoditi    = komoditiEl.options[komoditiEl.selectedIndex].text;
     const insektisidaEl = document.getElementById('s-insektisida');
@@ -590,25 +591,35 @@ function hitungSpraying() {
         ? (document.getElementById('s-insektisida-custom-nama').value || 'Custom')
         : insektisidaEl.options[insektisidaEl.selectedIndex].text;
 
-    const r         = kalkulasiSpraying(p, l, t, teras, sisiPanjang, sisiLebar, stapel);
+    // Jalankan Kalkulasi Inti
+    const r = kalkulasiSpraying(p, l, t, teras, sisiPanjang, sisiLebar, stapel);
     const luasFinalRaw = lingkungan ? r.totalLingkungan : r.total;
     const luasFinal = pembulatanCustom(luasFinalRaw);
-    const totalMl   = luasFinal * dosis;
 
+    // Hitung Konsentrasi Campuran (Sesuai Dosis Aplikasi)
+    // Asumsi standar BA: 30 ml larutan total per m2, di mana 0.25 ml adalah insektisida murni
+    const totalLarutanMl = luasFinal * 30; 
+    const totalPestisidaMl = luasFinal * dosis; 
+    const totalAirMl = totalLarutanMl - totalPestisidaMl;
+
+    // Update data tabel rincian di UI HTML
     updateSpraying(r, p, l, t, teras, sisiPanjang, sisiLebar, stapel);
 
     const rowLingkungan = document.getElementById('r-row-lingkungan');
     const rowFinal      = document.getElementById('r-row-final');
     if (lingkungan) {
-        rowLingkungan.style.display = '';
-        rowFinal.style.display      = '';
-        document.getElementById('r-lingkungan').textContent  = '+ ' + fmt(r.tambahanLingkungan) + ' m²';
-        document.getElementById('r-total-final').textContent = fmt(r.totalLingkungan) + ' m²';
+        if (rowLingkungan) rowLingkungan.style.display = '';
+        if (rowFinal) rowFinal.style.display = '';
+        const elLingkungan = document.getElementById('r-lingkungan');
+        const elTotalFinal = document.getElementById('r-total-final');
+        if (elLingkungan) elLingkungan.textContent = '+ ' + fmt(r.tambahanLingkungan) + ' m²';
+        if (elTotalFinal) elTotalFinal.textContent = fmt(r.totalLingkungan) + ' m²';
     } else {
-        rowLingkungan.style.display = 'none';
-        rowFinal.style.display      = 'none';
+        if (rowLingkungan) rowLingkungan.style.display = 'none';
+        if (rowFinal) rowFinal.style.display = 'none';
     }
 
+    // Tampilkan informasi tag ringkasan di atas box hasil
     document.getElementById('s-resultInfo').innerHTML =
         `<span class="info-tag">${komoditi}</span>
          <span class="info-sep">·</span>
@@ -617,6 +628,7 @@ function hitungSpraying() {
          <span class="info-tag">${dosis} ml/m²</span>
          ${lingkungan ? '<span class="info-sep">·</span><span class="info-tag" style="background:#e6f9f3;color:#00a878;border-color:#b2f0e0;">+10% Lingkungan</span>' : ''}`;
 
+    // Distribusikan nilai hasil akhir ke elemen display HTML
     document.getElementById('s-resDindingP').textContent    = fmt(r.dindingPanjang) + ' m²';
     document.getElementById('s-resDindingL').textContent    = fmt(r.dindingLebar) + ' m²';
     document.getElementById('s-resAtap').textContent        = fmt(r.atap) + ' m²';
@@ -624,15 +636,19 @@ function hitungSpraying() {
     document.getElementById('s-resStapel').textContent      = fmt(r.stapelArea) + ' m²';
     document.getElementById('s-resLantai').textContent      = '− ' + fmt(r.lantaiTidak) + ' m²';
     document.getElementById('s-resTotal').textContent       = fmt(luasFinal) + ' m²';
-    document.getElementById('s-resPestisida').textContent   = fmtMl(totalMl);
-    document.getElementById('s-resInsektisida').textContent = fmtMl(0.25 * luasFinal);
-    document.getElementById('s-resAir').textContent         = fmtMl(29.75 * luasFinal);
-    document.getElementById('s-resLarutan').textContent     = fmtMl(30 * luasFinal);
+    
+    // Output volume pelarut & campuran pestisida
+    document.getElementById('s-resPestisida').textContent   = fmtMl(totalPestisidaMl);
+    document.getElementById('s-resInsektisida').textContent = fmtMl(totalPestisidaMl);
+    document.getElementById('s-resAir').textContent         = fmtMl(totalAirMl);
+    document.getElementById('s-resLarutan').textContent     = fmtMl(totalLarutanMl);
 
+    // Sinkronisasi info header wilayah/lokasi kerja
     const sKanwil = document.getElementById('s-kanwil').value || '—';
     const sKancab = document.getElementById('s-kancab').value || '—';
     const sGudang = document.getElementById('s-gudang').value || '—';
     const sUnit   = document.getElementById('s-unit-gudang').value || '—';
+    
     document.getElementById('s-lokasi-info').innerHTML = `
         <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
             <span class="info-tag">${sKanwil}</span>
@@ -644,6 +660,7 @@ function hitungSpraying() {
             <span class="info-tag">${sUnit}</span>
         </div>`;
 
+    // Tampilkan container hasil kalkulasi dan aktifkan tombol download PDF
     tampilkanHasil('hasil-spraying');
     document.getElementById('btn-dl-spraying').style.display = 'flex';
 }
@@ -653,80 +670,128 @@ function hitungSpraying() {
 // ==============================
 
 function hitungFogging() {
-    const p           = parseFloat(document.getElementById('fg-panjang').value) || 0;
-    const l           = parseFloat(document.getElementById('fg-lebar').value) || 0;
-    const teras       = parseFloat(document.getElementById('fg-teras').value) || 0;
-    const sisiPanjang = parseFloat(document.getElementById('fg-sisi-panjang').value) || 0;
-    const sisiLebar   = parseFloat(document.getElementById('fg-sisi-lebar').value) || 0;
-    const dosis       = parseFloat(document.getElementById('fg-dosis').value) || 0;
-    const lingkungan  = document.getElementById('fg-lingkungan').checked;
-    const komoditiEl  = document.getElementById('fg-commodity');
-    const komoditi    = komoditiEl.options[komoditiEl.selectedIndex].text;
+    const p          = parseFloat(document.getElementById('fg-panjang').value) || 0;
+    const l          = parseFloat(document.getElementById('fg-lebar').value) || 0;
+    const dosis      = parseFloat(document.getElementById('fg-dosis').value) || 0;
+    const lingkungan = document.getElementById('fg-lingkungan').checked;
+
+    const komoditiEl = document.getElementById('fg-commodity');
+    const komoditi   = komoditiEl.options[komoditiEl.selectedIndex].text;
+
     const insektisidaEl = document.getElementById('fg-insektisida');
     const insektisida   = insektisidaEl.value === 'custom'
         ? (document.getElementById('fg-insektisida-custom-nama').value || 'Custom')
         : insektisidaEl.options[insektisidaEl.selectedIndex].text;
 
-    const lantai           = p * l;
-    const terasArea        = sisiPanjang * (p * teras) + sisiLebar * (l * teras);
-    const totalBase        = pembulatanCustom(lantai + terasArea);
-    const tambahanLingkungan = totalBase * 0.1;
-    const totalFinal       = totalBase * 1.1;
-    const total            = lingkungan ? totalFinal : totalBase;
-    const totalMl          = total * dosis;
+    // ==========================
+    // TERAS (SUPPORT CHECKBOX)
+    // ==========================
+    const terasArea  = getTerasArea('fg', p, l);
+    const terasRumus = getTerasRumusLabel('fg', p, l);
 
-    // tabel rincian
+    // ==========================
+    // KALKULASI
+    // ==========================
+    const lantai              = p * l;
+    const totalBase           = pembulatanCustom(lantai + terasArea);
+    const tambahanLingkungan  = totalBase * 0.1;
+    const totalFinal          = totalBase * 1.1;
+    const total               = lingkungan ? totalFinal : totalBase;
+    const totalMl             = total * dosis;
+
+    // ==========================
+    // RINCIAN PERHITUNGAN
+    // ==========================
     document.getElementById('fg-r-lantai-rumus').textContent = `${p} × ${l}`;
-    document.getElementById('fg-r-teras-rumus').textContent  = `${sisiPanjang}×(${p}×${teras}) + ${sisiLebar}×(${l}×${teras})`;
-    document.getElementById('fg-r-lantai').textContent       = fmt(lantai) + ' m²';
-    document.getElementById('fg-r-teras').textContent        = fmt(terasArea) + ' m²';
-    document.getElementById('fg-r-total').textContent        = fmt(totalBase) + ' m²';
+    document.getElementById('fg-r-teras-rumus').textContent  = terasRumus;
+
+    document.getElementById('fg-r-lantai').textContent = fmt(lantai) + ' m²';
+    document.getElementById('fg-r-teras').textContent  = fmt(terasArea) + ' m²';
+    document.getElementById('fg-r-total').textContent  = fmt(totalBase) + ' m²';
 
     const rowLingkungan = document.getElementById('fg-r-row-lingkungan');
     const rowFinal      = document.getElementById('fg-r-row-final');
+
     if (lingkungan) {
         rowLingkungan.style.display = '';
         rowFinal.style.display      = '';
-        document.getElementById('fg-r-lingkungan').textContent  = '+ ' + fmt(tambahanLingkungan) + ' m²';
-        document.getElementById('fg-r-total-final').textContent = fmt(totalFinal) + ' m²';
+
+        document.getElementById('fg-r-lingkungan').textContent =
+            '+ ' + fmt(tambahanLingkungan) + ' m²';
+
+        document.getElementById('fg-r-total-final').textContent =
+            fmt(totalFinal) + ' m²';
     } else {
         rowLingkungan.style.display = 'none';
         rowFinal.style.display      = 'none';
     }
 
+    // ==========================
+    // INFO TAG
+    // ==========================
     document.getElementById('fg-resultInfo').innerHTML =
         `<span class="info-tag">${komoditi}</span>
          <span class="info-sep">·</span>
          <span class="info-tag">${insektisida}</span>
          <span class="info-sep">·</span>
          <span class="info-tag">${dosis} ml/m²</span>
-         ${lingkungan ? '<span class="info-sep">·</span><span class="info-tag" style="background:#e6f9f3;color:#00a878;border-color:#b2f0e0;">+10% Lingkungan</span>' : ''}`;
+         ${lingkungan
+            ? '<span class="info-sep">·</span><span class="info-tag" style="background:#e6f9f3;color:#00a878;border-color:#b2f0e0;">+10% Lingkungan</span>'
+            : ''
+         }`;
 
-    document.getElementById('fg-resLantai').textContent      = fmt(lantai) + ' m²';
-    document.getElementById('fg-resTeras').textContent       = fmt(terasArea) + ' m²';
-    document.getElementById('fg-resTotal').textContent       = fmt(totalBase) + ' m²';
-    document.getElementById('fg-resPestisida').textContent   = fmtFog(totalMl);
-    document.getElementById('fg-resInsektisida').textContent = fmtFog(totalMl);
-    document.getElementById('fg-resAir').textContent         = fmtFog(total - totalMl);
-    document.getElementById('fg-resLarutan').textContent     = fmtFog(total);
+    // ==========================
+    // HASIL AKHIR
+    // ==========================
+    document.getElementById('fg-resLantai').textContent    =
+        fmt(lantai) + ' m²';
 
-    // baris lingkungan di hasil
+    document.getElementById('fg-resTeras').textContent     =
+        fmt(terasArea) + ' m²';
+
+    document.getElementById('fg-resTotal').textContent     =
+        fmt(totalBase) + ' m²';
+
+    document.getElementById('fg-resPestisida').textContent =
+        fmtFog(totalMl);
+
+    document.getElementById('fg-resInsektisida').textContent =
+        fmtFog(totalMl);
+
+    document.getElementById('fg-resAir').textContent =
+        fmtFog(total - totalMl);
+
+    document.getElementById('fg-resLarutan').textContent =
+        fmtFog(total);
+
+    // ==========================
+    // BARIS LINGKUNGAN HASIL
+    // ==========================
     const resRowLingkungan = document.getElementById('fg-res-row-lingkungan');
     const resRowFinal      = document.getElementById('fg-res-row-final');
+
     if (lingkungan) {
         resRowLingkungan.style.display = '';
         resRowFinal.style.display      = '';
-        document.getElementById('fg-resLingkungan').textContent  = '+ ' + fmt(tambahanLingkungan) + ' m²';
-        document.getElementById('fg-resTotalFinal').textContent  = fmt(totalFinal) + ' m²';
+
+        document.getElementById('fg-resLingkungan').textContent =
+            '+ ' + fmt(tambahanLingkungan) + ' m²';
+
+        document.getElementById('fg-resTotalFinal').textContent =
+            fmt(totalFinal) + ' m²';
     } else {
         resRowLingkungan.style.display = 'none';
         resRowFinal.style.display      = 'none';
     }
 
+    // ==========================
+    // LOKASI
+    // ==========================
     const fgKanwil = document.getElementById('fg-kanwil').value || '—';
     const fgKancab = document.getElementById('fg-kancab').value || '—';
     const fgGudang = document.getElementById('fg-gudang').value || '—';
     const fgUnit   = document.getElementById('fg-unit-gudang').value || '—';
+
     document.getElementById('fg-lokasi-info').innerHTML = `
         <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
             <span class="info-tag">${fgKanwil}</span>
@@ -738,6 +803,9 @@ function hitungFogging() {
             <span class="info-tag">${fgUnit}</span>
         </div>`;
 
+    // ==========================
+    // TAMPILKAN HASIL
+    // ==========================
     tampilkanHasil('hasil-fogging');
     document.getElementById('btn-dl-fogging').style.display = 'flex';
 }
@@ -875,6 +943,17 @@ function resetForm(tab) {
         document.getElementById('s-dosis').readOnly = true;
         document.getElementById('r-row-lingkungan').style.display = 'none';
         document.getElementById('r-row-final').style.display      = 'none';
+        document.getElementById('s-teras-sama-cb').checked             = false;
+        document.getElementById('s-teras-sama-box').style.background   = '#fff';
+        document.getElementById('s-teras-sama-box').style.borderColor  = '#e2e8f0';
+        document.getElementById('s-teras-sama-check').style.display    = 'none';
+        document.getElementById('s-teras-sama-label').style.borderColor = '#e2e8f0';
+        document.getElementById('s-teras-sama-label').style.background  = '#f8fafc';
+        document.getElementById('s-teras-beda-input').style.display    = 'block';
+        document.getElementById('s-teras-sama-input').style.display    = 'none';
+        ['s-teras','s-teras-memanjang','s-teras-melebar',
+        's-sisi-panjang','s-sisi-lebar',
+        's-sisi-panjang-sama','s-sisi-lebar-sama'].forEach(id => document.getElementById(id).value = '');
         ['r-dinding-panjang','r-dinding-lebar','r-atap','r-teras','r-stapel',
          'r-subtotal','r-lantai','r-total','r-dinding-panjang-rumus',
          'r-dinding-lebar-rumus','r-atap-rumus','r-teras-rumus',
@@ -914,6 +993,18 @@ function resetForm(tab) {
         document.getElementById('hasil-fogging').classList.remove('visible');
         document.getElementById('btn-dl-fogging').style.display = 'none';
         ['fg-kanwil','fg-kancab','fg-gudang','fg-unit-gudang'].forEach(id => document.getElementById(id).value = '');
+        //reset checkbox
+        document.getElementById('fg-teras-sama-cb').checked             = false;
+        document.getElementById('fg-teras-sama-box').style.background   = '#fff';
+        document.getElementById('fg-teras-sama-box').style.borderColor  = '#e2e8f0';
+        document.getElementById('fg-teras-sama-check').style.display    = 'none';
+        document.getElementById('fg-teras-sama-label').style.borderColor = '#e2e8f0';
+        document.getElementById('fg-teras-sama-label').style.background  = '#f8fafc';
+        document.getElementById('fg-teras-beda-input').style.display    = 'block';
+        document.getElementById('fg-teras-sama-input').style.display    = 'none';
+        ['fg-teras','fg-teras-memanjang','fg-teras-melebar',
+        'fg-sisi-panjang','fg-sisi-lebar',
+        'fg-sisi-panjang-sama','fg-sisi-lebar-sama'].forEach(id => document.getElementById(id).value = '');
     }
     if (tab === 'fumigasi-sf') {
         document.getElementById('sf-qty').value       = '';
@@ -978,7 +1069,72 @@ document.getElementById('fg-lingkungan-label').addEventListener('click', functio
         label.style.background  = '#f8fafc';
     }
 });
+// ==============================
+// CHECKBOX TERAS SAMA
+// ==============================
 
+function toggleTerasSama(prefix) {
+    const cb    = document.getElementById(prefix + '-teras-sama-cb');
+    const box   = document.getElementById(prefix + '-teras-sama-box');
+    const check = document.getElementById(prefix + '-teras-sama-check');
+    const label = document.getElementById(prefix + '-teras-sama-label');
+    const beda  = document.getElementById(prefix + '-teras-beda-input');
+    const sama  = document.getElementById(prefix + '-teras-sama-input');
+
+    cb.checked = !cb.checked;
+
+    if (cb.checked) {
+        box.style.background    = '#1a6ef5';
+        box.style.borderColor   = '#1a6ef5';
+        check.style.display     = 'block';
+        label.style.borderColor = '#1a6ef5';
+        label.style.background  = '#e8f0fe';
+        beda.style.display      = 'none';
+        sama.style.display      = 'grid';
+    } else {
+        box.style.background    = '#fff';
+        box.style.borderColor   = '#e2e8f0';
+        check.style.display     = 'none';
+        label.style.borderColor = '#e2e8f0';
+        label.style.background  = '#f8fafc';
+        beda.style.display      = 'block';
+        sama.style.display      = 'none';
+    }
+}
+
+function getTerasArea(prefix, p, l) {
+    const cb = document.getElementById(prefix + '-teras-sama-cb');
+    if (cb && cb.checked) {
+        // mode sama — 1 textbox
+        const teras = parseFloat(document.getElementById(prefix + '-teras').value) || 0;
+        const sisiP = parseFloat(document.getElementById(prefix + '-sisi-panjang-sama').value) || 0;
+        const sisiL = parseFloat(document.getElementById(prefix + '-sisi-lebar-sama').value) || 0;
+        return sisiP * (p * teras) + sisiL * (l * teras);
+    } else {
+        // mode beda — 2 textbox
+        const terasP = parseFloat(document.getElementById(prefix + '-teras-memanjang').value) || 0;
+        const terasL = parseFloat(document.getElementById(prefix + '-teras-melebar').value) || 0;
+        const sisiP  = parseFloat(document.getElementById(prefix + '-sisi-panjang').value) || 0;
+        const sisiL  = parseFloat(document.getElementById(prefix + '-sisi-lebar').value) || 0;
+        return sisiP * (p * terasP) + sisiL * (l * terasL);
+    }
+}
+
+function getTerasRumusLabel(prefix, p, l) {
+    const cb = document.getElementById(prefix + '-teras-sama-cb');
+    if (cb && cb.checked) {
+        const teras = parseFloat(document.getElementById(prefix + '-teras').value) || 0;
+        const sisiP = parseFloat(document.getElementById(prefix + '-sisi-panjang-sama').value) || 0;
+        const sisiL = parseFloat(document.getElementById(prefix + '-sisi-lebar-sama').value) || 0;
+        return `${sisiP}×(${p}×${teras}) + ${sisiL}×(${l}×${teras})`;
+    } else {
+        const terasP = parseFloat(document.getElementById(prefix + '-teras-memanjang').value) || 0;
+        const terasL = parseFloat(document.getElementById(prefix + '-teras-melebar').value) || 0;
+        const sisiP  = parseFloat(document.getElementById(prefix + '-sisi-panjang').value) || 0;
+        const sisiL  = parseFloat(document.getElementById(prefix + '-sisi-lebar').value) || 0;
+        return `${sisiP}×(${p}×${terasP}) + ${sisiL}×(${l}×${terasL})`;
+    }
+}
 onKomoditasChange();
 onFumiganChange();
 onObatSFChange();
