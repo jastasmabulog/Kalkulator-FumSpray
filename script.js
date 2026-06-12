@@ -540,50 +540,14 @@ function onInsektisidaChange(prefix) {
 // SPRAYING - KALKULASI
 // ==============================
 
-function kalkulasiSpraying(p, l, t, teras, sisiPanjang, sisiLebar, stapel) {
-    const dindingPanjang     = 2 * 2 * (p * t);
-    const dindingLebar       = 2 * 2 * (l * t);
-    const atap               = 2 * (p * l);
-    const terasArea          = sisiPanjang * (p * teras) + sisiLebar * (l * teras);
-    const stapelArea         = (stapel * 174) / 150;
-    const subtotal           = dindingPanjang + dindingLebar + atap + terasArea + stapelArea;
-    const lantaiTidak        = (stapel * 1) / 3.1;
-    const total              = subtotal - lantaiTidak;
-    const tambahanLingkungan = total * 0.1;
-    const totalLingkungan    = total * 1.1;
-
-    return { dindingPanjang, dindingLebar, atap, terasArea, stapelArea, subtotal, lantaiTidak, total, tambahanLingkungan, totalLingkungan };
-}
-
-function updateSpraying(r, p, l, t, teras, sisiPanjang, sisiLebar, stapel) {
-    document.getElementById('r-dinding-panjang-rumus').textContent = `2 × 2 × (${p} × ${t})`;
-    document.getElementById('r-dinding-lebar-rumus').textContent   = `2 × 2 × (${l} × ${t})`;
-    document.getElementById('r-atap-rumus').textContent            = `2 × (${p} × ${l})`;
-    document.getElementById('r-teras-rumus').textContent           = `${sisiPanjang}×(${p}×${teras}) + ${sisiLebar}×(${l}×${teras})`;
-    document.getElementById('r-stapel-rumus').textContent          = `${stapel} × 174 ÷ 150`;
-    document.getElementById('r-lantai-rumus').textContent          = `${stapel} × 1 ÷ 3.1`;
-
-    document.getElementById('r-dinding-panjang').textContent = fmt(r.dindingPanjang) + ' m²';
-    document.getElementById('r-dinding-lebar').textContent   = fmt(r.dindingLebar) + ' m²';
-    document.getElementById('r-atap').textContent            = fmt(r.atap) + ' m²';
-    document.getElementById('r-teras').textContent           = fmt(r.terasArea) + ' m²';
-    document.getElementById('r-stapel').textContent          = fmt(r.stapelArea) + ' m²';
-    document.getElementById('r-subtotal').textContent        = fmt(r.subtotal) + ' m²';
-    document.getElementById('r-lantai').textContent          = '− ' + fmt(r.lantaiTidak) + ' m²';
-    document.getElementById('r-total').textContent           = fmt(r.total) + ' m²';
-}
-
 function hitungSpraying() {
     const p           = parseFloat(document.getElementById('s-panjang').value) || 0;
     const l           = parseFloat(document.getElementById('s-lebar').value) || 0;
     const t           = parseFloat(document.getElementById('s-tinggi').value) || 0;
-    const teras       = parseFloat(document.getElementById('s-teras').value) || 0;
-    const sisiPanjang = parseFloat(document.getElementById('s-sisi-panjang').value) || 0;
-    const sisiLebar   = parseFloat(document.getElementById('s-sisi-lebar').value) || 0;
     const stapel      = parseFloat(document.getElementById('s-stapel').value) || 0;
     const dosis       = parseFloat(document.getElementById('s-dosis').value) || 0;
     const lingkungan  = document.getElementById('s-lingkungan').checked;
-    
+
     const komoditiEl  = document.getElementById('s-commodity');
     const komoditi    = komoditiEl.options[komoditiEl.selectedIndex].text;
     const insektisidaEl = document.getElementById('s-insektisida');
@@ -591,35 +555,52 @@ function hitungSpraying() {
         ? (document.getElementById('s-insektisida-custom-nama').value || 'Custom')
         : insektisidaEl.options[insektisidaEl.selectedIndex].text;
 
-    // Jalankan Kalkulasi Inti
-    const r = kalkulasiSpraying(p, l, t, teras, sisiPanjang, sisiLebar, stapel);
-    const luasFinalRaw = lingkungan ? r.totalLingkungan : r.total;
-    const luasFinal = pembulatanCustom(luasFinalRaw);
+    // pakai helper agar mendukung mode sama/beda
+    const terasArea       = getTerasArea('s', p, l);
+    const terasRumusLabel = getTerasRumusLabel('s', p, l);
 
-    // Hitung Konsentrasi Campuran (Sesuai Dosis Aplikasi)
-    // Asumsi standar BA: 30 ml larutan total per m2, di mana 0.25 ml adalah insektisida murni
-    const totalLarutanMl = luasFinal * 30; 
-    const totalPestisidaMl = luasFinal * dosis; 
-    const totalAirMl = totalLarutanMl - totalPestisidaMl;
+    const dindingPanjang     = 2 * 2 * (p * t);
+    const dindingLebar       = 2 * 2 * (l * t);
+    const atap               = 2 * (p * l);
+    const stapelArea         = (stapel * 174) / 150;
+    const subtotal           = dindingPanjang + dindingLebar + atap + terasArea + stapelArea;
+    const lantaiTidak        = (stapel * 1) / 3.1;
+    const total              = subtotal - lantaiTidak;
+    const tambahanLingkungan = total * 0.1;
+    const totalLingkungan    = total * 1.1;
+    const luasFinal          = lingkungan ? pembulatanCustom(totalLingkungan) : pembulatanCustom(total);
+    const totalPestisidaMl   = luasFinal * dosis;
+    const totalLarutanMl     = luasFinal * 30;
+    const totalAirMl         = totalLarutanMl - totalPestisidaMl;
 
-    // Update data tabel rincian di UI HTML
-    updateSpraying(r, p, l, t, teras, sisiPanjang, sisiLebar, stapel);
+    // update tabel rincian
+    document.getElementById('r-dinding-panjang-rumus').textContent = `2 × 2 × (${p} × ${t})`;
+    document.getElementById('r-dinding-lebar-rumus').textContent   = `2 × 2 × (${l} × ${t})`;
+    document.getElementById('r-atap-rumus').textContent            = `2 × (${p} × ${l})`;
+    document.getElementById('r-teras-rumus').textContent           = terasRumusLabel;
+    document.getElementById('r-stapel-rumus').textContent          = `${stapel} × 174 ÷ 150`;
+    document.getElementById('r-lantai-rumus').textContent          = `${stapel} × 1 ÷ 3.1`;
+    document.getElementById('r-dinding-panjang').textContent       = fmt(dindingPanjang) + ' m²';
+    document.getElementById('r-dinding-lebar').textContent         = fmt(dindingLebar) + ' m²';
+    document.getElementById('r-atap').textContent                  = fmt(atap) + ' m²';
+    document.getElementById('r-teras').textContent                 = fmt(terasArea) + ' m²';
+    document.getElementById('r-stapel').textContent                = fmt(stapelArea) + ' m²';
+    document.getElementById('r-subtotal').textContent              = fmt(subtotal) + ' m²';
+    document.getElementById('r-lantai').textContent                = '− ' + fmt(lantaiTidak) + ' m²';
+    document.getElementById('r-total').textContent                 = fmt(pembulatanCustom(total)) + ' m²';
 
     const rowLingkungan = document.getElementById('r-row-lingkungan');
     const rowFinal      = document.getElementById('r-row-final');
     if (lingkungan) {
-        if (rowLingkungan) rowLingkungan.style.display = '';
-        if (rowFinal) rowFinal.style.display = '';
-        const elLingkungan = document.getElementById('r-lingkungan');
-        const elTotalFinal = document.getElementById('r-total-final');
-        if (elLingkungan) elLingkungan.textContent = '+ ' + fmt(r.tambahanLingkungan) + ' m²';
-        if (elTotalFinal) elTotalFinal.textContent = fmt(r.totalLingkungan) + ' m²';
+        rowLingkungan.style.display = '';
+        rowFinal.style.display      = '';
+        document.getElementById('r-lingkungan').textContent  = '+ ' + fmt(tambahanLingkungan) + ' m²';
+        document.getElementById('r-total-final').textContent = fmt(pembulatanCustom(totalLingkungan)) + ' m²';
     } else {
-        if (rowLingkungan) rowLingkungan.style.display = 'none';
-        if (rowFinal) rowFinal.style.display = 'none';
+        rowLingkungan.style.display = 'none';
+        rowFinal.style.display      = 'none';
     }
 
-    // Tampilkan informasi tag ringkasan di atas box hasil
     document.getElementById('s-resultInfo').innerHTML =
         `<span class="info-tag">${komoditi}</span>
          <span class="info-sep">·</span>
@@ -628,27 +609,22 @@ function hitungSpraying() {
          <span class="info-tag">${dosis} ml/m²</span>
          ${lingkungan ? '<span class="info-sep">·</span><span class="info-tag" style="background:#e6f9f3;color:#00a878;border-color:#b2f0e0;">+10% Lingkungan</span>' : ''}`;
 
-    // Distribusikan nilai hasil akhir ke elemen display HTML
-    document.getElementById('s-resDindingP').textContent    = fmt(r.dindingPanjang) + ' m²';
-    document.getElementById('s-resDindingL').textContent    = fmt(r.dindingLebar) + ' m²';
-    document.getElementById('s-resAtap').textContent        = fmt(r.atap) + ' m²';
-    document.getElementById('s-resTeras').textContent       = fmt(r.terasArea) + ' m²';
-    document.getElementById('s-resStapel').textContent      = fmt(r.stapelArea) + ' m²';
-    document.getElementById('s-resLantai').textContent      = '− ' + fmt(r.lantaiTidak) + ' m²';
+    document.getElementById('s-resDindingP').textContent    = fmt(dindingPanjang) + ' m²';
+    document.getElementById('s-resDindingL').textContent    = fmt(dindingLebar) + ' m²';
+    document.getElementById('s-resAtap').textContent        = fmt(atap) + ' m²';
+    document.getElementById('s-resTeras').textContent       = fmt(terasArea) + ' m²';
+    document.getElementById('s-resStapel').textContent      = fmt(stapelArea) + ' m²';
+    document.getElementById('s-resLantai').textContent      = '− ' + fmt(lantaiTidak) + ' m²';
     document.getElementById('s-resTotal').textContent       = fmt(luasFinal) + ' m²';
-    
-    // Output volume pelarut & campuran pestisida
     document.getElementById('s-resPestisida').textContent   = fmtMl(totalPestisidaMl);
     document.getElementById('s-resInsektisida').textContent = fmtMl(totalPestisidaMl);
     document.getElementById('s-resAir').textContent         = fmtMl(totalAirMl);
     document.getElementById('s-resLarutan').textContent     = fmtMl(totalLarutanMl);
 
-    // Sinkronisasi info header wilayah/lokasi kerja
     const sKanwil = document.getElementById('s-kanwil').value || '—';
     const sKancab = document.getElementById('s-kancab').value || '—';
     const sGudang = document.getElementById('s-gudang').value || '—';
     const sUnit   = document.getElementById('s-unit-gudang').value || '—';
-    
     document.getElementById('s-lokasi-info').innerHTML = `
         <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;">
             <span class="info-tag">${sKanwil}</span>
@@ -660,11 +636,9 @@ function hitungSpraying() {
             <span class="info-tag">${sUnit}</span>
         </div>`;
 
-    // Tampilkan container hasil kalkulasi dan aktifkan tombol download PDF
     tampilkanHasil('hasil-spraying');
     document.getElementById('btn-dl-spraying').style.display = 'flex';
 }
-
 // ==============================
 // FOGGING - KALKULASI
 // ==============================
